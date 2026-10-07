@@ -34,19 +34,22 @@ const textos = {
         pregunta: "¡Hola! ¿Cómo te llamas?",
         bienvenida: "¡Bienvenido/a a CookieLab, ",
         holaDeNuevo: "Hola de nuevo, ",
-        sinNombre: "Hola, visitante anónimo"
+        sinNombre: "Hola, visitante anónimo",
+        visitas: (n) => "Has visitado esta página " + n + (n === 1 ? " vez" : " veces")
     },
     en: {
         pregunta: "Hi! What's your name?",
         bienvenida: "Welcome to CookieLab, ",
         holaDeNuevo: "Welcome back, ",
-        sinNombre: "Hello, anonymous visitor"
+        sinNombre: "Hello, anonymous visitor",
+        visitas: (n) => "You have visited this page " + n + (n === 1 ? " time" : " times")
     }
 };
 
 // ===================== ELEMENTOS DEL DOM =====================
 
 const saludo = document.getElementById("saludo");
+const pVisitas = document.getElementById("visitas");
 const selectTema = document.getElementById("tema");
 const selectIdioma = document.getElementById("idioma");
 
@@ -132,9 +135,34 @@ selectIdioma.addEventListener("change", () => {
     document.documentElement.lang = selectIdioma.value;
     // Volvemos a pintar los textos en el nuevo idioma
     mostrarSaludo();
+    mostrarVisitas();
 });
+
+// ===================== FASE 4: CONTADOR DE VISITAS =====================
+
+let numVisitas = 0;
+
+function contarVisita() {
+    const visitas = leerCookie("visitas");
+
+    if (visitas === null) {
+        numVisitas = 1;
+    } else {
+        // La cookie es texto: la pasamos a número antes de sumar
+        numVisitas = Number(visitas) + 1;
+    }
+
+    guardarCookie("visitas", numVisitas);
+}
+
+function mostrarVisitas() {
+    const t = textos[idiomaActual()];
+    pVisitas.textContent = t.visitas(numVisitas);
+}
 
 // ===================== INICIO =====================
 
 cargarPreferencias();
 comprobarUsuario();
+contarVisita();
+mostrarVisitas();
