@@ -18,6 +18,8 @@
             <p id="saludo"></p>
             <!-- Fase 4: contador de visitas -->
             <p id="visitas"></p>
+            <!-- Extra: última visita -->
+            <p id="ultimaVisita"></p>
         </section>
 
         <!-- Fase 3: preferencias -->
@@ -46,6 +48,20 @@
                 <button id="btnCambiarNombre">Cambiar mi nombre</button>
                 <button id="btnOlvidarme" class="peligro">Olvidarme</button>
             </div>
+        </section>
+
+        <!-- Extra: caducidad corta -->
+        <section class="tarjeta">
+            <h2>Caducidad corta</h2>
+            <p>Crea una cookie que dura solo 1 minuto y mira cómo desaparece sola.</p>
+            <button id="btnCookieCorta">Crear cookie de 1 minuto</button>
+            <p id="estadoCookieCorta"></p>
+        </section>
+
+        <!-- Visor de cookies (lo que devuelve document.cookie) -->
+        <section class="tarjeta">
+            <h2>document.cookie</h2>
+            <pre id="visorCookies"></pre>
         </section>
     </main>
 

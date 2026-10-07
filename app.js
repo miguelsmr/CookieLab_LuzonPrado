@@ -35,14 +35,18 @@ const textos = {
         bienvenida: "¡Bienvenido/a a CookieLab, ",
         holaDeNuevo: "Hola de nuevo, ",
         sinNombre: "Hola, visitante anónimo",
-        visitas: (n) => "Has visitado esta página " + n + (n === 1 ? " vez" : " veces")
+        visitas: (n) => "Has visitado esta página " + n + (n === 1 ? " vez" : " veces"),
+        ultimaVisita: "Tu última visita fue el ",
+        primeraVisita: "Es tu primera visita 🎉"
     },
     en: {
         pregunta: "Hi! What's your name?",
         bienvenida: "Welcome to CookieLab, ",
         holaDeNuevo: "Welcome back, ",
         sinNombre: "Hello, anonymous visitor",
-        visitas: (n) => "You have visited this page " + n + (n === 1 ? " time" : " times")
+        visitas: (n) => "You have visited this page " + n + (n === 1 ? " time" : " times"),
+        ultimaVisita: "Your last visit was on ",
+        primeraVisita: "This is your first visit 🎉"
     }
 };
 
@@ -50,10 +54,14 @@ const textos = {
 
 const saludo = document.getElementById("saludo");
 const pVisitas = document.getElementById("visitas");
+const pUltimaVisita = document.getElementById("ultimaVisita");
 const selectTema = document.getElementById("tema");
 const selectIdioma = document.getElementById("idioma");
 const btnCambiarNombre = document.getElementById("btnCambiarNombre");
 const btnOlvidarme = document.getElementById("btnOlvidarme");
+const btnCookieCorta = document.getElementById("btnCookieCorta");
+const estadoCookieCorta = document.getElementById("estadoCookieCorta");
+const visorCookies = document.getElementById("visorCookies");
 
 // Idioma actual (si no hay cookie, español)
 function idiomaActual() {
@@ -130,6 +138,7 @@ function cargarPreferencias() {
 selectTema.addEventListener("change", () => {
     guardarCookie("tema", selectTema.value);
     aplicarTema(selectTema.value);
+    actualizarVisor();
 });
 
 selectIdioma.addEventListener("change", () => {
@@ -138,6 +147,8 @@ selectIdioma.addEventListener("change", () => {
     // Volvemos a pintar los textos en el nuevo idioma
     mostrarSaludo();
     mostrarVisitas();
+    mostrarUltimaVisita();
+    actualizarVisor();
 });
 
 // ===================== FASE 4: CONTADOR DE VISITAS =====================
@@ -162,12 +173,37 @@ function mostrarVisitas() {
     pVisitas.textContent = t.visitas(numVisitas);
 }
 
+// ===================== EXTRA: FECHA DE LA ÚLTIMA VISITA =====================
+
+let ultimaVisita = null;
+
+function registrarVisita() {
+    // Leemos la fecha anterior ANTES de guardar la de hoy
+    ultimaVisita = leerCookie("ultimaVisita");
+    guardarCookie("ultimaVisita", new Date().toISOString());
+}
+
+function mostrarUltimaVisita() {
+    const idioma = idiomaActual();
+    const t = textos[idioma];
+
+    if (ultimaVisita === null) {
+        pUltimaVisita.textContent = t.primeraVisita;
+    } else {
+        const fecha = new Date(ultimaVisita);
+        const locale = idioma === "es" ? "es-ES" : "en-GB";
+        pUltimaVisita.textContent = t.ultimaVisita +
+            fecha.toLocaleDateString(locale) + " " + fecha.toLocaleTimeString(locale);
+    }
+}
+
 // ===================== FASE 5: PANEL DE CONTROL =====================
 
 btnCambiarNombre.addEventListener("click", () => {
     const nombre = pedirNombre();
     if (nombre) {
         mostrarSaludo();
+        actualizarVisor();
     }
 });
 
@@ -175,7 +211,7 @@ btnOlvidarme.addEventListener("click", () => {
     const confirmado = confirm("¿Seguro que quieres que CookieLab te olvide? Se borrarán todos tus datos.");
 
     if (confirmado) {
-        const nombres = ["usuario", "tema", "idioma", "visitas"];
+        const nombres = ["usuario", "tema", "idioma", "visitas", "ultimaVisita", "temporal"];
         nombres.forEach(borrarCookie);
 
         aplicarTema("oscuro");
@@ -183,8 +219,35 @@ btnOlvidarme.addEventListener("click", () => {
         selectIdioma.value = "es";
         saludo.textContent = "Te hemos olvidado. Recarga la página para empezar de cero.";
         pVisitas.textContent = "";
+        pUltimaVisita.textContent = "";
+        actualizarVisor();
     }
 });
+
+// ===================== EXTRA: CADUCIDAD CORTA =====================
+
+btnCookieCorta.addEventListener("click", () => {
+    guardarCookie("temporal", "dura1minuto", 60);
+    actualizarVisor();
+});
+
+function comprobarCookieCorta() {
+    if (leerCookie("temporal")) {
+        estadoCookieCorta.textContent = "✅ La cookie 'temporal' existe (caduca en 60 s)";
+    } else {
+        estadoCookieCorta.textContent = "❌ La cookie 'temporal' no existe";
+    }
+}
+
+// ===================== VISOR DE COOKIES =====================
+
+function actualizarVisor() {
+    visorCookies.textContent = decodeURIComponent(document.cookie) || "(no hay cookies)";
+    comprobarCookieCorta();
+}
+
+// Cada segundo refrescamos el visor para ver cómo caduca la cookie corta
+setInterval(actualizarVisor, 1000);
 
 // ===================== INICIO =====================
 
@@ -192,3 +255,6 @@ cargarPreferencias();
 comprobarUsuario();
 contarVisita();
 mostrarVisitas();
+registrarVisita();
+mostrarUltimaVisita();
+actualizarVisor();
