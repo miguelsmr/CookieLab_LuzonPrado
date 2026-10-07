@@ -52,6 +52,8 @@ const saludo = document.getElementById("saludo");
 const pVisitas = document.getElementById("visitas");
 const selectTema = document.getElementById("tema");
 const selectIdioma = document.getElementById("idioma");
+const btnCambiarNombre = document.getElementById("btnCambiarNombre");
+const btnOlvidarme = document.getElementById("btnOlvidarme");
 
 // Idioma actual (si no hay cookie, español)
 function idiomaActual() {
@@ -159,6 +161,30 @@ function mostrarVisitas() {
     const t = textos[idiomaActual()];
     pVisitas.textContent = t.visitas(numVisitas);
 }
+
+// ===================== FASE 5: PANEL DE CONTROL =====================
+
+btnCambiarNombre.addEventListener("click", () => {
+    const nombre = pedirNombre();
+    if (nombre) {
+        mostrarSaludo();
+    }
+});
+
+btnOlvidarme.addEventListener("click", () => {
+    const confirmado = confirm("¿Seguro que quieres que CookieLab te olvide? Se borrarán todos tus datos.");
+
+    if (confirmado) {
+        const nombres = ["usuario", "tema", "idioma", "visitas"];
+        nombres.forEach(borrarCookie);
+
+        aplicarTema("oscuro");
+        selectTema.value = "oscuro";
+        selectIdioma.value = "es";
+        saludo.textContent = "Te hemos olvidado. Recarga la página para empezar de cero.";
+        pVisitas.textContent = "";
+    }
+});
 
 // ===================== INICIO =====================
 
